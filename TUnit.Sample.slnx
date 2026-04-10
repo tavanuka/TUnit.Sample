@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/orchestration/">
+    <Project Path="orchestration/TUnit.Sample.AppHost/TUnit.Sample.AppHost.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="aspire.config.json" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/TUnit.Sample.ApiService/TUnit.Sample.ApiService.csproj" />
+    <Project Path="src/TUnit.Sample.Common/TUnit.Sample.Common.csproj" />
+    <Project Path="src/TUnit.Sample.Domain/TUnit.Sample.Domain.csproj" />
+    <Project Path="src/TUnit.Sample.Infrastructure/TUnit.Sample.Infrastructure.csproj" />
+    <Project Path="src/TUnit.Sample.ServiceDefaults/TUnit.Sample.ServiceDefaults.csproj" />
+    <Project Path="src/TUnit.Sample.Web/TUnit.Sample.Web.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/TUnit.Sample.ApiService.Tests/TUnit.Sample.ApiService.Tests.csproj" />
+    <Project Path="test/TUnit.Sample.Web.Tests/TUnit.Sample.Web.Tests.csproj" />
+  </Folder>
+  <Folder Name="/test/benchmarks/" />
+  <Folder Name="/test/Integration tests/">
+    <Project Path="test/TUnit.Sample.ApiService.IntegrationTests/TUnit.Sample.ApiService.IntegrationTests.csproj" />
+    <Project Path="test/TUnit.Sample.AppHost.IntegrationTests/TUnit.Sample.AppHost.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "orchestration/TUnit.Sample.AppHost/TUnit.Sample.AppHost.csproj"
+  }
+}
