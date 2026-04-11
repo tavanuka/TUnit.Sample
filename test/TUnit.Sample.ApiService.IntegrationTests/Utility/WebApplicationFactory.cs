@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using TUnit.AspNetCore;
 using TUnit.Sample.ApiService.Workers;
 using TUnit.Sample.Common.Constants;
@@ -30,6 +31,8 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
         builder.ConfigureServices(s => {
             // with this we remove premature database population to ensure that the test starts with a clean database.
             s.RemoveAll<DatabaseWorker>();
+            s.RemoveAll<IHostedService>();
+            
             s.RemoveAll<CoreDbContext>();
             s.RemoveAll<DbContextOptions<CoreDbContext>>();
             s.RemoveAll<IDbContextFactory<CoreDbContext>>();
