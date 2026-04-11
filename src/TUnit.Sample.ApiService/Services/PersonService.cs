@@ -5,7 +5,7 @@ using TUnit.Sample.Infrastructure;
 
 namespace TUnit.Sample.ApiService.Services;
 
-public class PersonService(CoreDbContext context, IAgeCalculator ageCalculator)
+public class PersonService(CoreDbContext context, IAgeCalculator ageCalculator) : IPersonService
 {
     public async Task<List<PersonResponse>> GetAll(CancellationToken cancellationToken = default)
     {
@@ -63,5 +63,31 @@ public class PersonService(CoreDbContext context, IAgeCalculator ageCalculator)
             await transaction.RollbackAsync(cancellationToken);
             return null;
         }
+    }
+
+    public async Task<bool> Update(UpdatePersonRequest request, Guid id, CancellationToken ct = default)
+    {
+        if (await context.Persons.FirstOrDefaultAsync(p => p.Id == id, ct) is not { } person)
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(request.FirstName))
+            person.FirstName = request.FirstName;
+        if (!string.IsNullOrWhiteSpace(request.LastName))
+            person.LastName = request.LastName;
+        if (request.BirthDate is {} dob)
+            person.BirthDate = dob;
+
+        await context.SaveChangesAsync(ct);
+        return true;
+    }
+    
+    public async Task<bool> Delete(Guid id, CancellationToken ct = default)
+    {
+        if (await context.Persons.FirstOrDefaultAsync(p => p.Id == id, ct) is not { } person)
+            return false;
+
+        context.Persons.Remove(person);
+        await context.SaveChangesAsync(ct);
+        return true;
     }
 }
