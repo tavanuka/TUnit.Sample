@@ -1,35 +1,18 @@
-﻿namespace TUnit.Sample.ApiService.Endpoints.WeatherForecasts;
+﻿using TUnit.Sample.ApiService.Services;
 
-public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+namespace TUnit.Sample.ApiService.Endpoints.WeatherForecasts;
+
+public record WeatherForecastResponse(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
 
 public static class WeatherForecastEndpoints
 {
-    private static readonly string[] Summaries =
-    [
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    ];
-
     public static void MapWeatherForecastEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/weatherforecast", () => GetWeatherForecast)
+        app.MapGet("/weatherforecast", (IWeatherForecastService forecastService) =>  Results.Ok(forecastService.GetForecast()))
             .WithName("GetWeatherForecast");
 
-    }
-
-    public static IResult GetWeatherForecast()
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    Summaries[Random.Shared.Next(Summaries.Length)]
-                ))
-            .ToArray();
-
-        return Results.Ok(forecast);
     }
 }
