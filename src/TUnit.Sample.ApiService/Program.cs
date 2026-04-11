@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using TUnit.Sample.ApiService.Endpoints.Books;
 using TUnit.Sample.ApiService.Endpoints.Persons;
 using TUnit.Sample.ApiService.Endpoints.WeatherForecasts;
@@ -20,7 +21,10 @@ builder.AddNpgsqlDbContext<CoreDbContext>(ResourceConstants.CoreDb, configureDbC
 );
 
 // Add services to the container.
-builder.Services.AddSingleton<PersonService>();
+builder.Services.TryAddScoped<IPersonService, PersonService>();
+builder.Services.TryAddSingleton<IAgeCalculator, AgeCalculator>();
+builder.Services.TryAddSingleton<IWeatherForecastService, WeatherForecastService>();
+
 builder.Services.AddSingleton<BookService>();
 builder.Services.AddProblemDetails();
 
