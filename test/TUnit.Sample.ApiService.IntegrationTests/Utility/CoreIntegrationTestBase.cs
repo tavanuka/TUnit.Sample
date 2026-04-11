@@ -11,7 +11,7 @@ using TUnit.Sample.Infrastructure.Data.Factories;
 namespace TUnit.Sample.ApiService.IntegrationTests.Utility;
 
 [ParallelLimiter<ProcessorCountParallelLimit>]
-public abstract class IntegrationTestBase : WebApplicationTest<WebApplicationFactory, Program>
+public abstract class CoreIntegrationTestBase : WebApplicationTest<WebApplicationFactory, Program>
 {
     [ClassDataSource<PostgreSqlTestContainer>(Shared = SharedType.PerTestSession)]
     public PostgreSqlTestContainer PostgreSqlTestContainer { get; init; } = null!;
@@ -59,6 +59,7 @@ public abstract class IntegrationTestBase : WebApplicationTest<WebApplicationFac
 
         await using var connection = new NpgsqlConnection(PostgreSqlTestContainer.Container.GetConnectionString());
         await connection.OpenAsync();
+
         await using var cmd = connection.CreateCommand();
         // language=PostgreSQL
         cmd.CommandText = $"""DROP SCHEMA IF EXISTS "{SchemaName}" CASCADE""";

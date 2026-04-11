@@ -4,7 +4,7 @@ using TUnit.Sample.ApiService.IntegrationTests.Utility;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.People;
 
-public class PersonEndpointIntegrationTests : IntegrationTestBase
+public class PersonEndpointsTests : CoreIntegrationTestBase
 {
 
     [Test]
