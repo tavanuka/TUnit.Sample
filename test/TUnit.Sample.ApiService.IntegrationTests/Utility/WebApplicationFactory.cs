@@ -5,15 +5,14 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System.Diagnostics.CodeAnalysis;
 using TUnit.AspNetCore;
+using TUnit.Sample.ApiService.Workers;
 using TUnit.Sample.Common.Constants;
 using TUnit.Sample.Infrastructure;
 using TUnit.Sample.Infrastructure.Data.Factories;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.Utility;
 
-[SuppressMessage("Usage", "TUnit0043:Property must use `required` keyword")]
 public class WebApplicationFactory : TestWebApplicationFactory<Program>
 {
     [ClassDataSource<PostgreSqlTestContainer>(Shared = SharedType.PerTestSession)]
@@ -29,6 +28,8 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(s => {
+            // with this we remove premature database population to ensure that the test starts with a clean database.
+            s.RemoveAll<DatabaseWorker>();
             s.RemoveAll<CoreDbContext>();
             s.RemoveAll<DbContextOptions<CoreDbContext>>();
             s.RemoveAll<IDbContextFactory<CoreDbContext>>();
