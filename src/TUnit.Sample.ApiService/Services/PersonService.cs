@@ -27,6 +27,7 @@ public class PersonService(CoreDbContext context, IAgeCalculator ageCalculator) 
         var now = DateTime.UtcNow;
         var person = await context.Persons
             .AsNoTracking()
+            .Where(p => p.Id == id)
             .Select(p => new PersonDetailResponse(
                 p.Id,
                 p.FirstName,
@@ -35,7 +36,7 @@ public class PersonService(CoreDbContext context, IAgeCalculator ageCalculator) 
                 ageCalculator.CalculateAge(p.BirthDate, now),
                 ageCalculator.IsMinor(p.BirthDate, now),
                 p.AuthoredBooks.Select(b => new PersonBookResponse(b.Id, b.Title, b.Isbn)).ToList()))
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken: ct);
+            .FirstOrDefaultAsync(cancellationToken: ct);
 
         return person;
     }
