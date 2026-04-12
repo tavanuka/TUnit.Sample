@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
 using TUnit.Sample.ApiService.Services;
-using TUnit.Sample.Infrastructure;
 
 namespace TUnit.Sample.ApiService.Endpoints.Books;
 
