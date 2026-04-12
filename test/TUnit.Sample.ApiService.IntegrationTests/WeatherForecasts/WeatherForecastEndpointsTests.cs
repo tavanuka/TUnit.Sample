@@ -1,7 +1,4 @@
-﻿using System.Net;
-using System.Net.Http.Json;
-using TUnit.Sample.ApiService.Endpoints.WeatherForecasts;
-using TUnit.Sample.ApiService.IntegrationTests.Utility;
+﻿using TUnit.Sample.ApiService.Endpoints.WeatherForecasts;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.WeatherForecasts;
 

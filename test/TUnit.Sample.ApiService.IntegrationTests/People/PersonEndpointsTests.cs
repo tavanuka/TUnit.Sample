@@ -1,7 +1,4 @@
-using System.Net;
-using System.Net.Http.Json;
 using TUnit.Sample.ApiService.Endpoints.Persons;
-using TUnit.Sample.ApiService.IntegrationTests.Utility;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.People;
 
