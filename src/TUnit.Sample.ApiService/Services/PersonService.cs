@@ -43,7 +43,6 @@ public class PersonService(CoreDbContext context, IAgeCalculator ageCalculator) 
     
     public async Task<Guid?> Insert(CreatePersonRequest request, CancellationToken cancellationToken = default)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         try
         {
             var person = new Person
@@ -55,13 +54,11 @@ public class PersonService(CoreDbContext context, IAgeCalculator ageCalculator) 
 
             context.Persons.Add(person);
             await context.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
             
             return person.Id;
         }
         catch (Exception)
         {
-            await transaction.RollbackAsync(cancellationToken);
             return null;
         }
     }
