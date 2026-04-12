@@ -2,9 +2,9 @@ using TUnit.Sample.ApiService.Services;
 
 namespace TUnit.Sample.ApiService.Tests.Services;
 
-public class BookServiceTests
+public class IsbnFormatterTests
 {
-    private readonly BookService _sut = new();
+    private readonly IsbnFormatter _sut = new();
 
     [Test]
     public async Task ValidateIsbn13_ValidIsbn_ReturnsTrue()
