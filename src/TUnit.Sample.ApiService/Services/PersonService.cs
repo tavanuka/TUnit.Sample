@@ -75,10 +75,14 @@ public class PersonService(CoreDbContext context, IAgeCalculator ageCalculator) 
         if (request.BirthDate is {} dob)
             person.BirthDate = dob;
 
+        // TODO: discriminated union return
+        if (!context.ChangeTracker.HasChanges())
+            return true;
+
         await context.SaveChangesAsync(ct);
         return true;
     }
-    
+
     public async Task<bool> Delete(Guid id, CancellationToken ct = default)
     {
         if (await context.Persons.FirstOrDefaultAsync(p => p.Id == id, ct) is not { } person)
