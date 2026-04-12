@@ -2,9 +2,9 @@ using TUnit.Sample.ApiService.Services;
 
 namespace TUnit.Sample.ApiService.Tests.Services;
 
-public class PersonServiceTests
+public class AgeCalculatorTests
 {
-    private readonly PersonService _sut = new();
+    private readonly AgeCalculator _sut = new();
 
     [Test]
     public async Task CalculateAge_BirthdayAlreadyPassed_ReturnsCorrectAge()
