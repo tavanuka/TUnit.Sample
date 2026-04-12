@@ -1,12 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
+using TUnit.Sample.ApiService.Endpoints.Persons;
 using TUnit.Sample.ApiService.IntegrationTests.Utility;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.People;
 
 public class PersonEndpointsTests : CoreIntegrationTestBase
 {
-
     [Test]
     public async Task GetPersons_ReturnsOkWithSeededData()
     {
@@ -19,12 +19,13 @@ public class PersonEndpointsTests : CoreIntegrationTestBase
 
         var persons = await response.Content.ReadFromJsonAsync<List<PersonResponse>>();
         await Assert.That(persons).IsNotNull();
-        await Assert.That(persons!.Count).IsGreaterThan(0);
+        await Assert.That(persons.Count).IsGreaterThan(0);
     }
 
     [Test]
     public async Task GetPersonById_InvalidId_ReturnsNotFound()
     {
+        await PopulateSchemaWithData();
         var client = Factory.CreateClient();
 
         var response = await client.GetAsync($"/persons/{Guid.NewGuid()}");
@@ -37,26 +38,39 @@ public class PersonEndpointsTests : CoreIntegrationTestBase
     {
         var client = Factory.CreateClient();
 
-        var createRequest = new
-        {
-            FirstName = "Test",
-            LastName = "Person",
-            BirthDate = "2000-01-15T00:00:00Z"
-        };
+        var createRequest = new CreatePersonRequest("Test", "Person", new DateTime(1990, 1, 15, 0, 0, 0, DateTimeKind.Utc));
 
         var postResponse = await client.PostAsJsonAsync("/persons", createRequest);
         await Assert.That(postResponse.StatusCode).IsEqualTo(HttpStatusCode.Created);
 
-        var created = await postResponse.Content.ReadFromJsonAsync<IdResponse>();
-        await Assert.That(created).IsNotNull();
+        var created = await postResponse.Content.ReadFromJsonAsync<Guid>();
+        await Assert.That(created).IsNotDefault();
 
-        var getResponse = await client.GetAsync($"/persons/{created!.Id}");
+        var getResponse = await client.GetAsync($"/persons/{created}");
         await Assert.That(getResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
         var person = await getResponse.Content.ReadFromJsonAsync<PersonDetailResponse>();
         await Assert.That(person).IsNotNull();
-        await Assert.That(person!.FirstName).IsEqualTo("Test");
-        await Assert.That(person.LastName).IsEqualTo("Person");
+        await Assert.That(person.FirstName).IsEqualTo(createRequest.FirstName);
+        await Assert.That(person.LastName).IsEqualTo(createRequest.LastName);
+        await Assert.That(person.BirthDate).IsEqualTo(createRequest.BirthDate);
+    }
+
+    [Test]
+    public async Task PatchPerson_ReturnsNoContent()
+    {
+        var client = Factory.CreateClient();
+
+        // Create a person first
+        var createRequest = new CreatePersonRequest("Before", "Update", DateTime.SpecifyKind(new DateTime(1995, 5, 5), DateTimeKind.Utc));
+        var postResponse = await client.PostAsJsonAsync("/persons", createRequest);
+        var created = await postResponse.Content.ReadFromJsonAsync<Guid>();
+        await Assert.That(created).IsNotDefault();
+
+        var updateRequest = createRequest with { FirstName = "After" };
+        var putResponse = await client.PutAsJsonAsync($"/persons/{created}", updateRequest);
+
+        await Assert.That(putResponse.StatusCode).IsEqualTo(HttpStatusCode.NoContent);
     }
 
     [Test]
@@ -65,14 +79,48 @@ public class PersonEndpointsTests : CoreIntegrationTestBase
         var client = Factory.CreateClient();
 
         // Create a person first
-        var createRequest = new { FirstName = "Before", LastName = "Update", BirthDate = "1995-05-05T00:00:00Z" };
+        var createRequest = new CreatePersonRequest("Before", "Update", DateTime.SpecifyKind(new DateTime(1995, 5, 5), DateTimeKind.Utc));
         var postResponse = await client.PostAsJsonAsync("/persons", createRequest);
-        var created = await postResponse.Content.ReadFromJsonAsync<IdResponse>();
+        var created = await postResponse.Content.ReadFromJsonAsync<Guid>();
+        await Assert.That(created).IsNotDefault();
 
-        var updateRequest = new { FirstName = "After", LastName = "Update", BirthDate = "1995-05-05T00:00:00Z" };
-        var putResponse = await client.PutAsJsonAsync($"/persons/{created!.Id}", updateRequest);
+        var updateRequest = createRequest with { FirstName = "After" };
+        var putResponse = await client.PutAsJsonAsync($"/persons/{created}", updateRequest);
 
         await Assert.That(putResponse.StatusCode).IsEqualTo(HttpStatusCode.NoContent);
+    }
+
+    [Test]
+    public async Task PutPerson_InvalidId_ValidRequest_InsertsNewPerson()
+    {
+        var client = Factory.CreateClient();
+        var createRequest = new CreatePersonRequest("Before", "Update", DateTime.SpecifyKind(new DateTime(1995, 5, 5), DateTimeKind.Utc));
+
+        var putResponse = await client.PutAsJsonAsync($"/persons/{Guid.NewGuid()}", createRequest);
+        await Assert.That(putResponse.StatusCode).IsEqualTo(HttpStatusCode.Created);
+
+        var created = await putResponse.Content.ReadFromJsonAsync<Guid>();
+        await Assert.That(created).IsNotDefault();
+
+        var getResponse = await client.GetAsync($"/persons/{created}");
+        await Assert.That(getResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        var getResponseContent = await getResponse.Content.ReadFromJsonAsync<PersonDetailResponse>();
+        await Assert.That(getResponseContent).IsNotNull();
+
+        await Assert.That(getResponseContent.FirstName).IsEqualTo(createRequest.FirstName);
+        await Assert.That(getResponseContent.LastName).IsEqualTo(createRequest.LastName);
+        await Assert.That(getResponseContent.BirthDate).IsEqualTo(createRequest.BirthDate);
+    }
+
+    [Test]
+    public async Task PutPerson_InvalidId_InvalidRequest_ReturnsBadRequest()
+    {
+        var client = Factory.CreateClient();
+        var createRequest = new UpdatePersonRequest(null, null, DateTime.SpecifyKind(new DateTime(1995, 5, 5), DateTimeKind.Utc));
+        
+        var putResponse = await client.PutAsJsonAsync($"/persons/{Guid.NewGuid()}", createRequest);
+        await Assert.That(putResponse.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
     }
 
     [Test]
@@ -81,19 +129,15 @@ public class PersonEndpointsTests : CoreIntegrationTestBase
         var client = Factory.CreateClient();
 
         // Create a person first
-        var createRequest = new { FirstName = "ToDelete", LastName = "Person", BirthDate = "1990-01-01T00:00:00Z" };
+        var createRequest = new CreatePersonRequest("Before", "Update", DateTime.SpecifyKind(new DateTime(1995, 1, 1), DateTimeKind.Utc));
         var postResponse = await client.PostAsJsonAsync("/persons", createRequest);
-        var created = await postResponse.Content.ReadFromJsonAsync<IdResponse>();
+        var created = await postResponse.Content.ReadFromJsonAsync<Guid>();
+        await Assert.That(created).IsNotDefault();
 
-        var deleteResponse = await client.DeleteAsync($"/persons/{created!.Id}");
+        var deleteResponse = await client.DeleteAsync($"/persons/{created}");
         await Assert.That(deleteResponse.StatusCode).IsEqualTo(HttpStatusCode.NoContent);
 
-        var getResponse = await client.GetAsync($"/persons/{created.Id}");
+        var getResponse = await client.GetAsync($"/persons/{created}");
         await Assert.That(getResponse.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
     }
-
-    private record PersonResponse(Guid Id, string FirstName, string LastName, DateTime BirthDate, int Age, bool IsMinor);
-    private record PersonDetailResponse(Guid Id, string FirstName, string LastName, DateTime BirthDate, int Age, bool IsMinor, List<PersonBookResponse> AuthoredBooks);
-    private record PersonBookResponse(Guid Id, string Title, string Isbn);
-    private record IdResponse(Guid Id);
 }
