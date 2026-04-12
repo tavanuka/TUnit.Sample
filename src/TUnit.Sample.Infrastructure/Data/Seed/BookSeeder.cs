@@ -7,15 +7,6 @@ namespace TUnit.Sample.Infrastructure.Data.Seed;
 
 public static class BookSeeder
 {
-    private static readonly Faker<Book> BookFaker = GetBookFaker();
-
-    private static Faker<Book> GetBookFaker() => new Faker<Book>()
-        .UseSeed(SeedConstants.Seed)
-        .RuleFor(x => x.Isbn, f => f.Commerce.Ean13())
-        .RuleFor(x => x.Title, f => f.Lorem.Sentence(4))
-        .RuleFor(x => x.PublishDate, f => f.Date.Past(10).ToUniversalTime())
-        .RuleFor(x => x.Description, f => f.Lorem.Paragraph());
-
     public static async Task SeedAsync(DbContext context, CancellationToken cancellationToken)
     {
         var booksSet = context.Set<Book>();
@@ -34,9 +25,15 @@ public static class BookSeeder
             .Select(x => x.Id)
             .ToHashSetAsync(cancellationToken);
 
-        BookFaker.RuleFor(x => x.AuthorId, f => f.PickRandom(peopleIds));
+        var bookFaker = new Faker<Book>()
+            .UseSeed(SeedConstants.Seed)
+            .RuleFor(x => x.Isbn, f => f.Commerce.Ean13())
+            .RuleFor(x => x.Title, f => f.Lorem.Sentence(4))
+            .RuleFor(x => x.PublishDate, f => f.Date.Past(10).ToUniversalTime())
+            .RuleFor(x => x.Description, f => f.Lorem.Paragraph())
+            .RuleFor(x => x.AuthorId, f => f.PickRandom(peopleIds));
 
-        var books = BookFaker.Generate(420);
+        var books = bookFaker.Generate(420);
         booksSet.AddRange(books);
 
         await context.SaveChangesAsync(cancellationToken);
