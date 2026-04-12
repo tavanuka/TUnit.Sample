@@ -22,10 +22,12 @@ builder.AddNpgsqlDbContext<CoreDbContext>(ResourceConstants.CoreDb, configureDbC
 
 // Add services to the container.
 builder.Services.TryAddScoped<IPersonService, PersonService>();
-builder.Services.TryAddSingleton<IAgeCalculator, AgeCalculator>();
+builder.Services.TryAddScoped<IBookService, BookService>();
 builder.Services.TryAddSingleton<IWeatherForecastService, WeatherForecastService>();
 
-builder.Services.AddSingleton<BookService>();
+builder.Services.TryAddSingleton<IAgeCalculator, AgeCalculator>();
+builder.Services.TryAddSingleton<IIsbnFormatter, IsbnFormatter>();
+
 builder.Services.AddProblemDetails();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
