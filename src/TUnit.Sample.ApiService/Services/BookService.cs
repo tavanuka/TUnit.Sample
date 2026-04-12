@@ -1,31 +1,105 @@
+﻿using Microsoft.EntityFrameworkCore;
+using TUnit.Sample.ApiService.Endpoints.Books;
+using TUnit.Sample.Domain;
+using TUnit.Sample.Infrastructure;
+
 namespace TUnit.Sample.ApiService.Services;
 
-public class BookService
+public class BookService(CoreDbContext context, IIsbnFormatter formatter) : IBookService
 {
-    public bool ValidateIsbn13(string isbn)
+    public async Task<List<BookResponse>> GetAll(CancellationToken cancellationToken = default)
     {
-        var digits = isbn.Where(char.IsDigit).ToArray();
-        if (digits.Length != 13)
-            return false;
+        var books = await context.Books
+            .AsNoTracking()
+            .Select(b => new BookResponse(
+                b.Id,
+                b.Title,
+                b.Description,
+                b.PublishDate,
+                b.Isbn, formatter.FormatIsbn(b.Isbn),
+                b.AuthorId,
+                b.Author.FullName))
+            .ToListAsync(cancellationToken: cancellationToken);
 
-        var sum = 0;
-        for (var i = 0; i < 12; i++)
-        {
-            var digit = digits[i] - '0';
-            sum += (i % 2 == 0) ? digit : digit * 3;
-        }
-
-        var checkDigit = (10 - (sum % 10)) % 10;
-        return checkDigit == (digits[12] - '0');
+        return books;
     }
 
-    public string FormatIsbn(string isbn)
-    {
-        var digits = new string(isbn.Where(char.IsDigit).ToArray());
-        if (digits.Length != 13)
-            return isbn;
+    public async Task<BookDetailResponse?> GetById(Guid id, CancellationToken cancellationToken = default)
+        => await context.Books
+            .AsNoTracking()
+            .Where(b => b.Id == id)
+            .Select(b => new BookDetailResponse(
+                b.Id,
+                b.Title,
+                b.Description,
+                b.PublishDate,
+                b.Isbn, formatter.FormatIsbn(b.Isbn),
+                b.AuthorId,
+                b.Author.FullName))
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-        // Format: XXX-X-XX-XXXXXX-X (EAN-group-publisher-title-check)
-        return $"{digits[..3]}-{digits[3]}-{digits[4..6]}-{digits[6..12]}-{digits[12]}";
+    public async Task<Guid?> Insert(CreateBookRequest request, CancellationToken cancellationToken = default)
+    {
+        // TODO: Fluent Validation and better result management
+        if (!formatter.ValidateIsbn13(request.Isbn))
+            return null;
+
+        if (!await context.Persons.AnyAsync(x => x.Id == request.AuthorId, cancellationToken))
+            return null;
+
+        var book = new Book
+        {
+            Title = request.Title,
+            Description = request.Description,
+            PublishDate = request.PublishDate,
+            Isbn = request.Isbn,
+            AuthorId = request.AuthorId
+        };
+
+        context.Books.Add(book);
+        await context.SaveChangesAsync(cancellationToken);
+        return book.Id;
+    }
+
+    public async Task<bool> Update(Guid id, UpdateBookRequest request, CancellationToken cancellationToken = default)
+    {
+        if (!formatter.ValidateIsbn13(request.Isbn ?? ""))
+            return false;
+
+        if (await context.Books.FirstOrDefaultAsync(b => b.Id == id, cancellationToken) is not {} book)
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(request.Title))
+            book.Title = request.Title;
+
+        if (!string.IsNullOrWhiteSpace(request.Description))
+            book.Description = request.Description;
+
+        if (request.PublishDate is {} publishDate)
+            book.PublishDate = publishDate;
+
+        if (!string.IsNullOrWhiteSpace(request.Isbn))
+            book.Isbn = request.Isbn;
+
+        if (request.AuthorId is {} authorId
+            && await context.Persons.AnyAsync(x => x.Id == authorId, cancellationToken))
+            book.AuthorId = authorId;
+
+        if (!context.ChangeTracker.HasChanges())
+            return false;
+
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> Delete(Guid id, CancellationToken cancellationToken = default)
+    {
+        if (await context.Books.FirstOrDefaultAsync(b => b.Id == id, cancellationToken) is not {} book)
+            return false;
+
+        context.Books.Remove(book);
+
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }
