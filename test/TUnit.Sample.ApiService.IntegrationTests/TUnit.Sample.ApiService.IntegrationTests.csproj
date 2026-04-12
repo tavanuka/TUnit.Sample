@@ -18,10 +18,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\TUnit.Sample.ApiService\TUnit.Sample.ApiService.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="WeatherForecasts\" />
-    </ItemGroup>
     
 
 </Project>
