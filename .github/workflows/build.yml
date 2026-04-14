@@ -62,8 +62,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run unit tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output-format cobertura \
-          --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]"
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]" --coverage-output-format cobertura
 
       - name: Upload TRX artifact
         uses: actions/upload-artifact@v6
@@ -106,8 +105,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run Blazor component tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output-format cobertura \
-          --report-trx --treenode-filter "/*/*/*/*[Category=Components]"
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Components]" --coverage-output-format cobertura
 
       - name: Upload TRX artifact
         uses: actions/upload-artifact@v6
@@ -147,11 +145,10 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Build
-        run: dotnet build --configuration Release
+        run: dotnet build --configuration Release --no-restore
 
       - name: Run integration tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output-format cobertura \
-          --report-trx --treenode-filter "/*/*/*/*[Category=Integration]"
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Integration]" --coverage-output-format cobertura
 
       - name: Upload TRX artifact
         uses: actions/upload-artifact@v6
