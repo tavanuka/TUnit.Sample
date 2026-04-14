@@ -62,7 +62,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Expose GitHub Actions Runtime
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
@@ -72,14 +72,14 @@ jobs:
         run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]" --coverage-output-format cobertura --ignore-exit-code 8
 
       - name: Upload TRX artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: trx-unit
           path: ./TestResults/*.trx
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-unit
@@ -112,7 +112,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Expose GitHub Actions Runtime
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
@@ -122,14 +122,14 @@ jobs:
         run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Components]" --coverage-output-format cobertura --ignore-exit-code 8
 
       - name: Upload TRX artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: trx-component
           path: ./TestResults/*.trx
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-component
@@ -162,7 +162,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Expose GitHub Actions Runtime
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
@@ -172,14 +172,14 @@ jobs:
         run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Integration]" --coverage-output-format cobertura --ignore-exit-code 8
 
       - name: Upload TRX artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: trx-integration
           path: ./TestResults/*.trx
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-integration
@@ -212,7 +212,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Expose GitHub Actions Runtime
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
@@ -231,14 +231,14 @@ jobs:
           ASPIRE_ALLOW_UNSECURED_TRANSPORT: "true"
 
       - name: Upload TRX artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: trx-aspire
           path: ./TestResults/*.trx
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-aspire
@@ -254,14 +254,14 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download all TRX artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           pattern: trx-*
           path: TestResults
           merge-multiple: true
 
       - name: Download all coverage artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           pattern: coverage-*
           path: TestResults
