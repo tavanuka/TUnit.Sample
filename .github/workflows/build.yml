@@ -73,7 +73,7 @@ jobs:
             core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
 
       - name: Run unit tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output ./TestResults/coverage.cobertura.xml --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]" --coverage-output-format cobertura --ignore-exit-code 8
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]" --coverage-output-format cobertura --ignore-exit-code 8
 
       - name: Upload TRX artifact
         uses: actions/upload-artifact@v7
@@ -87,7 +87,7 @@ jobs:
         if: always()
         with:
           name: coverage-unit
-          path: ./TestResults/coverage.cobertura.xml
+          path: ./TestResults/**/*.cobertura.xml
 
   component-test:
     name: Component test
@@ -123,7 +123,7 @@ jobs:
             core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
 
       - name: Run Blazor component tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output ./TestResults/coverage.cobertura.xml --report-trx --treenode-filter "/*/*/*/*[Category=Components]" --coverage-output-format cobertura --ignore-exit-code 8
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Components]" --coverage-output-format cobertura --ignore-exit-code 8
 
       - name: Upload TRX artifact
         uses: actions/upload-artifact@v7
@@ -137,7 +137,7 @@ jobs:
         if: always()
         with:
           name: coverage-component
-          path: ./TestResults/coverage.cobertura.xml
+          path: ./TestResults/**/*.cobertura.xml
 
   integration-test:
     name: Integration Test
@@ -173,7 +173,7 @@ jobs:
             core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
 
       - name: Run integration tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output ./TestResults/coverage.cobertura.xml --report-trx --treenode-filter "/*/*/*/*[Category=Integration]" --coverage-output-format cobertura --ignore-exit-code 8
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Integration]" --coverage-output-format cobertura --ignore-exit-code 8
 
       - name: Upload TRX artifact
         uses: actions/upload-artifact@v7
@@ -187,7 +187,7 @@ jobs:
         if: always()
         with:
           name: coverage-integration
-          path: ./TestResults/coverage.cobertura.xml
+          path: ./TestResults/**/*.cobertura.xml
 
   aspire-test:
     name: Aspire Test
@@ -230,7 +230,7 @@ jobs:
           sudo update-ca-certificates
 
       - name: Run Aspire tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output ./TestResults/coverage.cobertura.xml --report-trx --treenode-filter "/*/*/*/*[Category=AppHost]" --coverage-output-format cobertura --ignore-exit-code 8
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=AppHost]" --coverage-output-format cobertura --ignore-exit-code 8
         env:
           ASPIRE_ALLOW_UNSECURED_TRANSPORT: "true"
 
@@ -246,7 +246,7 @@ jobs:
         if: always()
         with:
           name: coverage-aspire
-          path: ./TestResults/coverage.cobertura.xml
+          path: ./TestResults/**/*.cobertura.xml
 
   report:
     name: Report
@@ -277,13 +277,13 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          directory: ./TestResults
+          files: ./TestResults/**/*.cobertura.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
         with:
-          directory: ./TestResults
+          files: ./TestResults/**/*.trx
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: test_results     
