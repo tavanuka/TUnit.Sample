@@ -211,14 +211,18 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          directory: TestResults
+          directory: ./TestResults
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          directory: ./TestResults
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results     
 
       - name: Qodana code inspection
         uses: JetBrains/qodana-action@v2025.3
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1507766807 }}
-          QODANA_ENDPOINT: 'https://qodana.cloud'
-        with:
-          args: --image jetbrains/qodana-cdnet:2025.3
-          cache-default-branch-only: true
