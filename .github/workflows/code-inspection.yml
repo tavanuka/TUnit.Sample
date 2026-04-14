@@ -1,0 +1,50 @@
+﻿name: Code inspection
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
+      - 'releases/*' # The release branches
+jobs:
+  qodana:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
+          fetch-depth: 0  # a full history is required for pull request analysis
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ vars.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/global.json') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Debug --no-restore
+
+#      - name: Install .NET SDK for Qodana
+#        run: curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 10.0 --install-dir "$GITHUB_WORKSPACE/.dotnet"
+
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v2025.3
+        with:
+          pr-mode: false
+#          args: --solution TUnit.Sample.slnx --property=dotnet.msbuild.dotnet-cli=/usr/share/dotnet/dotnet
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1311845410 }}

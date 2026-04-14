@@ -1,0 +1,289 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+  
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/global.json') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/global.json') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Expose GitHub Actions Runtime
+        uses: actions/github-script@v9
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
+      - name: Run unit tests with coverage
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]" --coverage-output-format cobertura --ignore-exit-code 8
+
+      - name: Upload TRX artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: trx-unit
+          path: ./TestResults/**/*.trx
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-unit
+          path: ./TestResults/**/*.cobertura.xml
+
+  component-test:
+    name: Component test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/global.json') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Expose GitHub Actions Runtime
+        uses: actions/github-script@v9
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
+      - name: Run Blazor component tests with coverage
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Components]" --coverage-output-format cobertura --ignore-exit-code 8
+
+      - name: Upload TRX artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: trx-component
+          path: ./TestResults/**/*.trx
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-component
+          path: ./TestResults/**/*.cobertura.xml
+
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/global.json') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Expose GitHub Actions Runtime
+        uses: actions/github-script@v9
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
+      - name: Run integration tests with coverage
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Integration]" --coverage-output-format cobertura --ignore-exit-code 8
+
+      - name: Upload TRX artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: trx-integration
+          path: ./TestResults/**/*.trx
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-integration
+          path: ./TestResults/**/*.cobertura.xml
+
+  aspire-test:
+    name: Aspire Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ vars.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/global.json') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Expose GitHub Actions Runtime
+        uses: actions/github-script@v9
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
+      - name: Trust ASP.NET Core dev certificate
+        run: |
+          mkdir -p "$HOME/.aspnet/https"
+          dotnet dev-certs https -ep "$HOME/.aspnet/https/devcert.crt" --format PEM --no-password
+          sudo cp "$HOME/.aspnet/https/devcert.crt" /usr/local/share/ca-certificates/dotnet-devcert.crt
+          sudo update-ca-certificates
+
+      - name: Run Aspire tests with coverage
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=AppHost]" --coverage-output-format cobertura --ignore-exit-code 8
+        env:
+          ASPIRE_ALLOW_UNSECURED_TRANSPORT: "true"
+
+      - name: Upload TRX artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: trx-aspire
+          path: ./TestResults/**/*.trx
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-aspire
+          path: ./TestResults/**/*.cobertura.xml
+
+  report:
+    name: Report
+    runs-on: ubuntu-latest
+    needs: [ test, component-test, integration-test, aspire-test ]
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download all TRX artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: trx-*
+          path: TestResults
+          merge-multiple: true
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: coverage-*
+          path: TestResults
+
+      - name: List downloaded artifacts
+        if: always()
+        run: find TestResults -type f | sort 2>/dev/null || echo "No files found in TestResults"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./TestResults/**/*.cobertura.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./TestResults/**/*.trx
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results     

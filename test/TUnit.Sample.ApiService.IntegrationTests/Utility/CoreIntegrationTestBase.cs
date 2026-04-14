@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -40,7 +41,8 @@ public abstract class CoreIntegrationTestBase : WebApplicationTest<WebApplicatio
             .Options;
 
         await using var dbContext = new CoreDbContext(options) { SchemaName = SchemaName };
-        await dbContext.Database.EnsureCreatedAsync();
+        var dbCreator = (RelationalDatabaseCreator)dbContext.Database.GetService<IDatabaseCreator>();
+        await dbCreator.CreateTablesAsync();
     }
 
     protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
