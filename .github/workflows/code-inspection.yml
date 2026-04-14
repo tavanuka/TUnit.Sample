@@ -38,13 +38,13 @@ jobs:
       - name: Build
         run: dotnet build --configuration Debug --no-restore
 
-      - name: Unset DOTNET_ROOT
-        run: echo "DOTNET_ROOT=" >> $GITHUB_ENV
+#      - name: Install .NET SDK for Qodana
+#        run: curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 10.0 --install-dir "$GITHUB_WORKSPACE/.dotnet"
 
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
           pr-mode: false
-          args: --solution TUnit.Sample.slnx --no-build
+          args: --solution TUnit.Sample.slnx --property=dotnet.msbuild.dotnet-cli=/usr/share/dotnet/dotnet
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1311845410 }}
