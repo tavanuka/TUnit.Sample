@@ -80,7 +80,7 @@ jobs:
         if: always()
         with:
           name: trx-unit
-          path: ./TestResults/*.trx
+          path: ./TestResults/**/*.trx
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v7
@@ -130,7 +130,7 @@ jobs:
         if: always()
         with:
           name: trx-component
-          path: ./TestResults/*.trx
+          path: ./TestResults/**/*.trx
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v7
@@ -180,7 +180,7 @@ jobs:
         if: always()
         with:
           name: trx-integration
-          path: ./TestResults/*.trx
+          path: ./TestResults/**/*.trx
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v7
@@ -239,7 +239,7 @@ jobs:
         if: always()
         with:
           name: trx-aspire
-          path: ./TestResults/*.trx
+          path: ./TestResults/**/*.trx
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v7
@@ -269,6 +269,10 @@ jobs:
         with:
           pattern: coverage-*
           path: TestResults
+
+      - name: List downloaded artifacts
+        if: always()
+        run: find TestResults -type f | sort 2>/dev/null || echo "No files found in TestResults"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
