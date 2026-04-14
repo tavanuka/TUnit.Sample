@@ -220,4 +220,5 @@ jobs:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1507766807 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
         with:
+          args: --image jetbrains/qodana-cdnet:2025.1
           cache-default-branch-only: true
