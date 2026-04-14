@@ -39,5 +39,6 @@ jobs:
         uses: JetBrains/qodana-action@v2025.3
         with:
           pr-mode: false
+          args: --solution TUnit.Sample.slnx
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1311845410 }}
