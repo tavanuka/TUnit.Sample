@@ -62,7 +62,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run unit tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directors ./TestResults -- --coverage --coverage-output-format cobertura \
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output-format cobertura \
           --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]"
 
       - name: Upload TRX artifact
@@ -106,7 +106,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run Blazor component tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directors ./TestResults -- --coverage --coverage-output-format cobertura \
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output-format cobertura \
           --report-trx --treenode-filter "/*/*/*/*[Category=Components]"
 
       - name: Upload TRX artifact
@@ -150,7 +150,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run integration tests with coverage
-        run: dotnet test --configuration Release --no-build --results-directors ./TestResults -- --coverage --coverage-output-format cobertura \
+        run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --coverage-output-format cobertura \
           --report-trx --treenode-filter "/*/*/*/*[Category=Integration]"
 
       - name: Upload TRX artifact
