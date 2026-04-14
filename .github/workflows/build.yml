@@ -221,7 +221,7 @@ jobs:
       - name: Run Aspire tests with coverage
         run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=AppHost]" --coverage-output-format cobertura --ignore-exit-code 8
         env:
-          ASPIRE_ALLOW_UNSECURED_TRANSPORT: true
+          ASPIRE_ALLOW_UNSECURED_TRANSPORT: "true"
 
       - name: Upload TRX artifact
         uses: actions/upload-artifact@v6
