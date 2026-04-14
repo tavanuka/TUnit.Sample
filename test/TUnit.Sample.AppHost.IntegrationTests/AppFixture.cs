@@ -5,6 +5,7 @@ namespace TUnit.Sample.AppHost.IntegrationTests;
 
 public class AppFixture : AspireFixture<Projects.TUnit_Sample_AppHost>
 {
+    protected override TimeSpan ResourceTimeout => TimeSpan.FromMinutes(3);
     protected override ResourceWaitBehavior WaitBehavior => ResourceWaitBehavior.Named;
     protected override IEnumerable<string> ResourcesToWaitFor() => [ResourceConstants.WebApi, ResourceConstants.WebFrontend];
     
