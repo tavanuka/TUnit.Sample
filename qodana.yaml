@@ -3,9 +3,6 @@
 ####################################################################################################################
 
 version: "1.0"
-linter: jetbrains/qodana-cdnet:latest
-dotnet:
-  solution: TUnit.Sample.slnx
 profile:
   name: qodana.recommended
 include:
