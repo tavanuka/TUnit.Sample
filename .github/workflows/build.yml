@@ -61,6 +61,13 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
+      - name: Expose GitHub Actions Runtime
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
       - name: Run unit tests with coverage
         run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]" --coverage-output-format cobertura --ignore-exit-code 8
 
@@ -104,6 +111,13 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
+      - name: Expose GitHub Actions Runtime
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
       - name: Run Blazor component tests with coverage
         run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Components]" --coverage-output-format cobertura --ignore-exit-code 8
 
@@ -133,7 +147,7 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
-          
+
       - name: Restore dependencies
         run: dotnet restore
 
@@ -146,6 +160,13 @@ jobs:
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
+
+      - name: Expose GitHub Actions Runtime
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
 
       - name: Run integration tests with coverage
         run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Integration]" --coverage-output-format cobertura --ignore-exit-code 8
@@ -186,15 +207,6 @@ jobs:
           pattern: coverage-*
           path: TestResults
           merge-multiple: true
-
-      - name: Publish test results
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Test Results
-          path: TestResults/*.trx
-          reporter: dotnet-trx
-          fail-on-error: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
