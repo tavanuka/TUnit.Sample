@@ -38,6 +38,9 @@ jobs:
       - name: Build
         run: dotnet build --configuration Debug --no-restore
 
+      - name: Unset DOTNET_ROOT
+        run: echo "DOTNET_ROOT=" >> $GITHUB_ENV
+
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
