@@ -240,7 +240,7 @@ jobs:
   report:
     name: Report
     runs-on: ubuntu-latest
-    needs: [ test, component-test, integration-test ]
+    needs: [ test, component-test, integration-test, aspire-test ]
     if: always()
     steps:
       - name: Checkout
