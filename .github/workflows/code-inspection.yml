@@ -45,6 +45,6 @@ jobs:
         uses: JetBrains/qodana-action@v2025.3
         with:
           pr-mode: false
-          args: --solution TUnit.Sample.slnx --property=dotnet.msbuild.dotnet-cli=/usr/share/dotnet/dotnet
+#          args: --solution TUnit.Sample.slnx --property=dotnet.msbuild.dotnet-cli=/usr/share/dotnet/dotnet
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1311845410 }}
