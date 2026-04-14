@@ -220,6 +220,7 @@ jobs:
 
       - name: Trust ASP.NET Core dev certificate
         run: |
+          mkdir -p "$HOME/.aspnet/https"
           dotnet dev-certs https -ep "$HOME/.aspnet/https/devcert.crt" --format PEM --no-password
           sudo cp "$HOME/.aspnet/https/devcert.crt" /usr/local/share/ca-certificates/dotnet-devcert.crt
           sudo update-ca-certificates
