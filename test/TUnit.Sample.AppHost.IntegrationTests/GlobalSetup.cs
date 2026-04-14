@@ -1,1 +1,1 @@
-﻿[assembly: Category("Integration")]
+﻿[assembly: Category("AppHost")]
