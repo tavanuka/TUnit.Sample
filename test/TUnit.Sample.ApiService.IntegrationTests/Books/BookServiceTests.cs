@@ -60,7 +60,7 @@ public class BookServiceTests : CoreIntegrationTestBase
         var createBookRequest = new CreateBookRequest(
             faker.Lorem.Sentence(4),
             faker.Lorem.Paragraph(),
-            faker.Date.Between(new DateTime(1900, 1, 1), DateTime.Today)
+            faker.Date.Between(DateTime.SpecifyKind(new DateTime(1900, 1, 1), DateTimeKind.Utc), DateTime.Today)
                 .ToUniversalTime(),
             faker.Commerce.Ean13(),
             person.Id
