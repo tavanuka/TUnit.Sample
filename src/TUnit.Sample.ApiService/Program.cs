@@ -27,6 +27,8 @@ builder.Services.TryAddSingleton<IWeatherForecastService, WeatherForecastService
 
 builder.Services.TryAddSingleton<IAgeCalculator, AgeCalculator>();
 builder.Services.TryAddSingleton<IIsbnFormatter, IsbnFormatter>();
+builder.Services.TryAddSingleton<IDateTimeProvider, DateTimeProvider>();
+builder.Services.TryAddSingleton<IBookEventPublisher, LoggingBookEventPublisher>();
 
 builder.Services.AddProblemDetails();
 
