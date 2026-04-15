@@ -14,11 +14,17 @@ namespace TUnit.Sample.ApiService.IntegrationTests.Utility;
 [ParallelLimiter<ProcessorCountParallelLimit>]
 public abstract class CoreIntegrationTestBase : WebApplicationTest<WebApplicationFactory, Program>
 {
+    // Saving the database scope here to be able to dispose it after each test.
+    // This is convenient because we don't have to deal with getting a DbContext in each test manually.
+    private IServiceScope? _scope;
+    
     [ClassDataSource<PostgreSqlTestContainer>(Shared = SharedType.PerTestSession)]
     public PostgreSqlTestContainer PostgreSqlTestContainer { get; init; } = null!;
 
     protected string SchemaName { get; private set; } = null!;
 
+    protected CoreDbContext DbContext { get; private set; } = null!;
+    
     protected override async Task SetupAsync()
     {
         SchemaName = GetIsolatedName("schema");
@@ -53,9 +59,35 @@ public abstract class CoreIntegrationTestBase : WebApplicationTest<WebApplicatio
         });
     }
 
+    // Hint: If you want to re-use the before logic, you can make another method and assign another BeforeAttribute hook.
+    // Due to nature of source generation, base class hooks will be executed first, and onwards (bottoms-up).
+    // Additionally, the Order property can also be assigned to dictate which hook gets triggered
+    [Before(Test)]
+    public Task SetupDatabaseContextBeforeTest()
+    {
+        try
+        {
+            Console.WriteLine("Before Test 1");
+            // Because this happens right between lifecycle step 8 and 9, we can safely create the context. 
+            // https://tunit.dev/docs/examples/aspnet#lifecycle-order
+            _scope = Factory.Services.CreateScope();
+            DbContext = _scope.ServiceProvider.GetRequiredService<CoreDbContext>();
+            return Task.CompletedTask;
+        }
+        catch (Exception exception)
+        {
+            return Task.FromException(exception);
+        }
+    }
+
     [After(Test)]
     public async Task CleanupSchema()
     {
+        if (_scope is IAsyncDisposable asyncScope)
+            await asyncScope.DisposeAsync();
+        else
+            _scope?.Dispose();
+
         if (string.IsNullOrEmpty(SchemaName))
             return;
 
