@@ -22,7 +22,7 @@ public class BookServiceTests : CoreIntegrationTestBase
     private readonly IIsbnFormatterMock _formatter = IIsbnFormatter.Mock();
     private readonly IDateTimeProviderMock _timeProvider = IDateTimeProvider.Mock();
     
-    public BookServiceTests()
+    static BookServiceTests()
     {
         Randomizer.Seed = new Random(Seed);
     }
@@ -60,7 +60,7 @@ public class BookServiceTests : CoreIntegrationTestBase
         var createBookRequest = new CreateBookRequest(
             faker.Lorem.Sentence(4),
             faker.Lorem.Paragraph(),
-            faker.Date.Between(new DateTime(1900, 1, 1), DateTime.UtcNow)
+            faker.Date.Between(new DateTime(1900, 1, 1), DateTime.Today)
                 .ToUniversalTime(),
             faker.Commerce.Ean13(),
             person.Id
