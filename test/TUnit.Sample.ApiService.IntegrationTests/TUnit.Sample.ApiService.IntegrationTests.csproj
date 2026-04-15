@@ -13,6 +13,7 @@
         <PackageReference Include="Testcontainers.PostgreSql" Version="4.11.0" />
         <PackageReference Include="TUnit" Version="1.30.8"/>
         <PackageReference Include="TUnit.AspNetCore" Version="1.30.8" />
+        <PackageReference Include="TUnit.Mocks" Version="1.34.0-beta" />
     </ItemGroup>
 
     <ItemGroup>
