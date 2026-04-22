@@ -1,17 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using TUnit.Sample.ApiService.Services;
+using TUnit.Sample.Common.Contracts.Persons;
 
 namespace TUnit.Sample.ApiService.Endpoints.Persons;
-
-public record PersonResponse(Guid Id, string FirstName, string LastName, DateTime BirthDate, int Age, bool IsMinor);
-
-public record PersonDetailResponse(Guid Id, string FirstName, string LastName, DateTime BirthDate, int Age, bool IsMinor, List<PersonBookResponse> AuthoredBooks);
-
-public record PersonBookResponse(Guid Id, string Title, string Isbn);
-
-public record CreatePersonRequest(string FirstName, string LastName, DateTime BirthDate);
-
-public record UpdatePersonRequest(string? FirstName, string? LastName, DateTime? BirthDate);
 
 public static class PersonsEndpoints
 {

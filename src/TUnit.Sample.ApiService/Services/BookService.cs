@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TUnit.Sample.ApiService.Endpoints.Books;
+using TUnit.Sample.Common.Contracts.Books;
 using TUnit.Sample.Domain;
 using TUnit.Sample.Infrastructure;
 

@@ -1,14 +1,7 @@
 using TUnit.Sample.ApiService.Services;
+using TUnit.Sample.Common.Contracts.Books;
 
 namespace TUnit.Sample.ApiService.Endpoints.Books;
-
-public record BookResponse(Guid Id, string Title, string Description, DateTime PublishDate, string Isbn, string FormattedIsbn, Guid AuthorId, string AuthorName);
-
-public record BookDetailResponse(Guid Id, string Title, string Description, DateTime PublishDate, string Isbn, string FormattedIsbn, Guid AuthorId, string AuthorName);
-
-public record CreateBookRequest(string Title, string Description, DateTime PublishDate, string Isbn, Guid AuthorId);
-
-public record UpdateBookRequest(string? Title, string? Description, DateTime? PublishDate, string? Isbn, Guid? AuthorId);
 
 public static class BooksEndpoints
 {

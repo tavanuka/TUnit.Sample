@@ -1,4 +1,4 @@
-﻿using TUnit.Sample.ApiService.Endpoints.Books;
+﻿using TUnit.Sample.Common.Contracts.Books;
 
 namespace TUnit.Sample.ApiService.Services;
 
