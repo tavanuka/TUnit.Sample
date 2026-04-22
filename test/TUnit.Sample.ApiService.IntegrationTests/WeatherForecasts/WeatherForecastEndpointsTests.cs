@@ -1,4 +1,4 @@
-﻿using TUnit.Sample.ApiService.Endpoints.WeatherForecasts;
+﻿using TUnit.Sample.Common.Contracts.WeatherForecasts;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.WeatherForecasts;
 

@@ -1,4 +1,4 @@
-using TUnit.Sample.ApiService.Endpoints.Persons;
+using TUnit.Sample.Common.Contracts.Persons;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.People;
 

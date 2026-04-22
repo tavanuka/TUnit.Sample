@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using TUnit.Mocks.Generated.TUnit.Sample.ApiService.Services;
-using TUnit.Sample.ApiService.Endpoints.Books;
 using TUnit.Sample.ApiService.Services;
+using TUnit.Sample.Common.Contracts.Books;
 using PersonEntity=TUnit.Sample.Domain.Person;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.Books;

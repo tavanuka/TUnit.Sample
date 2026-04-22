@@ -1,5 +1,5 @@
-using TUnit.Sample.ApiService.Endpoints.Books;
-using TUnit.Sample.ApiService.Endpoints.Persons;
+using TUnit.Sample.Common.Contracts.Books;
+using TUnit.Sample.Common.Contracts.Persons;
 
 namespace TUnit.Sample.ApiService.IntegrationTests.Books;
 
