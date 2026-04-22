@@ -1,0 +1,27 @@
+﻿<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Authored Books <span class="badge bg-secondary">@AuthoredBooks.Count</span></h5>
+    </div>
+    @if (AuthoredBooks.Count == 0)
+    {
+        <div class="card-body">
+            <p class="mb-0 text-muted">No authored books.</p>
+        </div>
+    }
+    else
+    {
+        <ul class="list-group list-group-flush">
+            @foreach (var book in AuthoredBooks)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@book.Title</span>
+                    <code class="text-muted">@book.Isbn</code>
+                </li>
+            }
+        </ul>
+    }
+</div>
+@code {
+    [Parameter, EditorRequired]
+    public required List<PersonBookResponse> AuthoredBooks { get; set; }
+}

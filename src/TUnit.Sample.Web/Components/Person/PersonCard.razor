@@ -1,0 +1,31 @@
+﻿<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">@Person.FirstName @Person.LastName</h3>
+        <span class="badge @(Person.IsMinor ? "bg-warning text-dark" : "bg-success") fs-6">
+            @(Person.IsMinor ? "Minor" : "Adult")
+        </span>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Id</dt>
+            <dd class="col-sm-9"><code>@Person.Id</code></dd>
+
+            <dt class="col-sm-3">First Name</dt>
+            <dd class="col-sm-9">@Person.FirstName</dd>
+
+            <dt class="col-sm-3">Last Name</dt>
+            <dd class="col-sm-9">@Person.LastName</dd>
+
+            <dt class="col-sm-3">Birth Date</dt>
+            <dd class="col-sm-9">@Person.BirthDate.ToString("yyyy-MM-dd")</dd>
+
+            <dt class="col-sm-3">Age</dt>
+            <dd class="col-sm-9">@Person.Age</dd>
+        </dl>
+    </div>
+</div>
+@code {
+
+    [Parameter, EditorRequired]
+    public required PersonDetailResponse Person { get; set; }
+}

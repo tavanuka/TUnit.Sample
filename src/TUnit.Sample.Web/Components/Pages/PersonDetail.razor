@@ -1,0 +1,74 @@
+@page "/people/{Id:guid}"
+@using System.Net
+@using TUnit.Sample.Web.Components.Person
+@rendermode InteractiveServer
+
+@inject IPersonApi PersonApi
+@inject NavigationManager Nav
+
+<PageTitle>@(_person?.FirstName is null ? "Person" : $"{_person.FirstName} {_person.LastName}")</PageTitle>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/people">People</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Details</li>
+    </ol>
+</nav>
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_notFound)
+{
+    <div class="alert alert-warning" role="alert">
+        Person not found.
+    </div>
+    <button class="btn btn-secondary" @onclick="GoBack">Back to list</button>
+}
+else if (_person is not null)
+{
+    <PersonCard Person="@_person"/>
+    <AuthoredBookListCard AuthoredBooks="@_person.AuthoredBooks"/>
+
+    <div class="mt-3">
+        <button class="btn btn-secondary" @onclick="GoBack">Back to list</button>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private PersonDetailResponse? _person;
+    private bool _loading = true;
+    private bool _notFound;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _notFound = false;
+        _person = null;
+
+        await FetchPersonDetails();
+
+        _loading = false;
+    }
+    private async Task FetchPersonDetails()
+    {
+        using var response = await PersonApi.GetByIdAsync(Id);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            _notFound = true;
+        }
+        else if (!response.IsSuccessStatusCode)
+        {
+            throw response.Error ?? throw new HttpRequestException($"Request failed with status {response.StatusCode}.");
+        }
+        else
+        {
+            _person = response.Content;
+        }
+    }
+
+    private void GoBack() => Nav.NavigateTo("/people");
+}
