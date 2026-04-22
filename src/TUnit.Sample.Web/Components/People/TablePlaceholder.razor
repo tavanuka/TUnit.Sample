@@ -1,0 +1,33 @@
+﻿@using TUnit.Sample.Web.Components.Pages
+<div class="table-responsive" aria-busy="true" aria-label="Loading people">
+    <table class="table table-striped table-bordered align-middle placeholder-glow mb-0 people-grid">
+        <thead class="table-light">
+        <tr>
+            @foreach (var col in Columns)
+            {
+                <th class="@col.HeaderClass">@col.Title</th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        @for (var i = 0; i < 8; i++)
+        {
+            <tr>
+                @foreach (var col in Columns)
+                {
+                    <td class="@col.HeaderClass">
+                        <div class="row-link"><span class="placeholder @col.PlaceholderWidth"></span></div>
+                    </td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required People.ColumnDef[] Columns { get; set; }
+
+}

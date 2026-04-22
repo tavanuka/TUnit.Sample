@@ -1,0 +1,108 @@
+@page "/people"
+@using TUnit.Sample.Web.Components.People
+@rendermode InteractiveServer
+
+@inject IPersonApi PersonApi
+
+<PageTitle>People</PageTitle>
+
+<div class="d-flex justify-content-between align-items-end mb-3 flex-wrap gap-2">
+    <div>
+        <h1 class="mb-1">People</h1>
+        <p class="text-muted mb-0">Browse everyone in the catalog. Click a row to see their details.</p>
+    </div>
+    @if (_people is not null)
+    {
+        <span class="badge bg-primary rounded-pill fs-6">
+            <i class="bi bi-people-fill me-1"
+               aria-hidden="true"></i>@_people.Count @(_people.Count == 1 ? "person" : "people")
+        </span>
+    }
+</div>
+
+<div class="card shadow-sm border-0 mb-2">
+    @if (_people is null)
+    {
+        <TablePlaceholder Columns="Columns"/>
+    }
+    else if (_people.Count == 0)
+    {
+        <div class="card-body">
+            <div class="alert alert-info mb-0" role="alert">
+                <i class="bi bi-info-circle me-2" aria-hidden="true"></i>No people found.
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <QuickGrid Items="@_peopleQueryable"
+                       Class="table table-striped table-bordered table-hover align-middle mb-0 people-grid"
+                       ItemKey="@(p => p.Id)">
+                @foreach (var col in Columns)
+                {
+                    <TemplateColumn Title="@col.Title" SortBy="@col.SortBy" Class="@col.HeaderClass">
+                        @col.Cell(context)
+                    </TemplateColumn>
+                }
+            </QuickGrid>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly ColumnDef[] Columns =
+    [
+        new("First Name",
+            "col-8",
+            null,
+            GridSort<PersonResponse>.ByAscending(p => p.FirstName),
+            p => @<a class="row-link" href="@DetailUrl(p.Id)">@p.FirstName</a>),
+        new("Last Name",
+            "col-7",
+            null,
+            GridSort<PersonResponse>.ByAscending(p => p.LastName),
+            p => @<a class="row-link" href="@DetailUrl(p.Id)">@p.LastName</a>),
+        new("Birth Date",
+            "col-5",
+            null,
+            GridSort<PersonResponse>.ByAscending(p => p.BirthDate),
+            p => @<a class="row-link" href="@DetailUrl(p.Id)">@p.BirthDate.ToString("yyyy-MM-dd")</a>),
+        new("Age",
+            "col-3",
+            "text-end",
+            GridSort<PersonResponse>.ByAscending(p => p.Age),
+            p => @<a class="row-link text-end" href="@DetailUrl(p.Id)">@p.Age</a>),
+        new("Status",
+            "col-4",
+            null,
+            null,
+            p =>
+                @<a class="row-link" href="@DetailUrl(p.Id)">
+                        <span
+                            class="badge @(p.IsMinor ? "bg-warning text-dark" : "bg-success")">@(p.IsMinor ? "Minor" : "Adult")</span>
+                </a>)
+    ];
+
+    private List<PersonResponse>? _people;
+    private IQueryable<PersonResponse> _peopleQueryable = Enumerable.Empty<PersonResponse>().AsQueryable();
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _people is not null) return;
+
+        await Task.Delay(1000);// Simulated loading time
+        _people = await PersonApi.GetAllAsync();
+        _peopleQueryable = _people.AsQueryable();
+        StateHasChanged();
+    }
+
+    private static string DetailUrl(Guid id) => $"/people/{id}";
+
+    public sealed record ColumnDef(
+        string Title,
+        string PlaceholderWidth,
+        string? HeaderClass,
+        GridSort<PersonResponse>? SortBy,
+        RenderFragment<PersonResponse> Cell);
+}
