@@ -1,3 +1,4 @@
+using Refit;
 using TUnit.Sample.Web;
 using TUnit.Sample.Web.Components;
 
@@ -17,6 +18,9 @@ builder.Services.AddHttpClient<WeatherApiClient>(client => {
     // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
     client.BaseAddress = new("https+http://apiservice");
 });
+
+builder.Services.AddRefitClient<IPersonApi>()
+    .ConfigureHttpClient(client => client.BaseAddress = new("https+http://apiservice"));
 
 var app = builder.Build();
 
