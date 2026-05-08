@@ -19,7 +19,7 @@ jobs:
   - job: build
     displayName: Build
     pool:
-      name: Default
+      vmImage: 'ubuntu-latest'
     steps:
       - task: UseDotNet@2
         displayName: Setup .NET
@@ -44,7 +44,7 @@ jobs:
     displayName: Test
     dependsOn: build
     pool:
-      name: Default
+      vmImage: 'ubuntu-latest'
     steps:
       - task: UseDotNet@2
         displayName: Setup .NET
@@ -98,7 +98,7 @@ jobs:
     displayName: Component test
     dependsOn: build
     pool:
-      name: Default
+      vmImage: 'ubuntu-latest'
     steps:
       - task: UseDotNet@2
         displayName: Setup .NET
@@ -152,7 +152,7 @@ jobs:
     displayName: Integration Test
     dependsOn: build
     pool:
-      name: Default
+      vmImage: 'ubuntu-latest'
     steps:
       - task: UseDotNet@2
         displayName: Setup .NET
@@ -206,7 +206,7 @@ jobs:
     displayName: Aspire Test
     dependsOn: build
     pool:
-      name: Default
+      vmImage: 'ubuntu-latest'
     steps:
       - task: UseDotNet@2
         displayName: Setup .NET
@@ -274,7 +274,7 @@ jobs:
       - aspire_test
     condition: succeeded()
     pool:
-      name: Default
+      vmImage: 'ubuntu-latest'
     steps:
       - checkout: none
 
