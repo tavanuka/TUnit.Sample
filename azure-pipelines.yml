@@ -20,7 +20,6 @@ jobs:
     displayName: Build, Test, Report
     pool:
       vmImage: 'ubuntu-latest'
-    timeoutInMinutes: 60
     steps:
       - task: UseDotNet@2
         displayName: Setup .NET
@@ -92,18 +91,14 @@ jobs:
         displayName: Upload coverage artifact
         condition: succeededOrFailed()
 
-      - script: dotnet tool install --global dotnet-reportgenerator-globaltool
-        displayName: Install ReportGenerator
-        condition: succeededOrFailed()
-
-      - script: |
-          reportgenerator \
-            "-reports:$(System.DefaultWorkingDirectory)/TestResults/**/*.cobertura.xml" \
-            "-targetdir:$(Build.ArtifactStagingDirectory)/CoverageReport" \
-            "-reporttypes:HtmlInline_AzurePipelines;Cobertura" \
-            "-title:TUnit.Sample"
+      - task: reportgenerator@5
         displayName: Generate combined coverage report
         condition: succeededOrFailed()
+        inputs:
+          reports: $(System.DefaultWorkingDirectory)/TestResults/**/*.cobertura.xml
+          targetdir: $(Build.ArtifactStagingDirectory)/CoverageReport
+          reporttypes: HtmlInline_AzurePipelines;Cobertura
+          title: TUnit.Sample
 
       - task: PublishCodeCoverageResults@2
         displayName: Publish merged coverage
