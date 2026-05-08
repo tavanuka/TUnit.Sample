@@ -80,12 +80,11 @@ dotnet test -- --coverage --report-trx \
 
 Coverage reports (Cobertura XML) and TRX test results are uploaded as artifacts and consolidated in the `report` job, which sends them to [Codecov](https://codecov.io).
 
-### Code Inspection (`code-inspection.yml`)
+### Code Inspection (`build.yml` under the `sonarqube` job)
 
-*Note: this step is currently disabled due to community edition not supporting the project frameworks present in this repository.*
-*SonarQube Cloud is available as an alternative.*
-
-Runs [Qodana Community for .NET](https://www.jetbrains.com/qodana/) static analysis on every PR and push to `master`.
+Runs [SonarScanner .NET](https://github.com/SonarSource/sonar-scanner-msbuild) static analysis on every PR and push to `master`.
+Uses the debug configuration to ensure better static code analysis results. Additionally, code coverage artifacts are uploaded during the scan to provide additional insights 
+in the SonarQube dashboard.
 
 ## Key Features Demonstrated
 
