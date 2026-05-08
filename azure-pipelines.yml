@@ -19,6 +19,7 @@ jobs:
   - job: build_test_report
     displayName: Build, Test, Report
     pool:
+      name: Default
       vmImage: 'ubuntu-latest'
     steps:
       - task: UseDotNet@2
