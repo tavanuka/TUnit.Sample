@@ -16,11 +16,10 @@ variables:
   dotnetVersion: '10.0.x'
 
 jobs:
-  - job: build_test_report
-    displayName: Build, Test, Report
+  - job: build
+    displayName: Build
     pool:
       name: Default
-      vmImage: 'ubuntu-latest'
     steps:
       - task: UseDotNet@2
         displayName: Setup .NET
@@ -41,6 +40,193 @@ jobs:
       - script: dotnet build --no-restore --configuration Release
         displayName: Build
 
+  - job: test
+    displayName: Test
+    dependsOn: build
+    pool:
+      name: Default
+    steps:
+      - task: UseDotNet@2
+        displayName: Setup .NET
+        inputs:
+          version: $(dotnetVersion)
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        inputs:
+          key: 'nuget | "$(Agent.OS)" | **/*.csproj, **/global.json'
+          restoreKeys: |
+            nuget | "$(Agent.OS)"
+          path: $(NUGET_PACKAGES)
+
+      - script: dotnet restore
+        displayName: Restore dependencies
+
+      - script: dotnet build --configuration Release --no-restore
+        displayName: Build
+
+      - script: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]" --coverage-output-format cobertura --ignore-exit-code 8
+        displayName: Run unit tests with coverage
+
+      - task: CopyFiles@2
+        displayName: Stage TRX files
+        condition: always()
+        inputs:
+          sourceFolder: $(System.DefaultWorkingDirectory)/TestResults
+          contents: '**/*.trx'
+          targetFolder: $(Build.ArtifactStagingDirectory)/trx-unit
+
+      - publish: $(Build.ArtifactStagingDirectory)/trx-unit
+        artifact: trx-unit
+        displayName: Upload TRX artifact
+        condition: always()
+
+      - task: CopyFiles@2
+        displayName: Stage coverage files
+        condition: always()
+        inputs:
+          sourceFolder: $(System.DefaultWorkingDirectory)/TestResults
+          contents: '**/*.cobertura.xml'
+          targetFolder: $(Build.ArtifactStagingDirectory)/coverage-unit
+
+      - publish: $(Build.ArtifactStagingDirectory)/coverage-unit
+        artifact: coverage-unit
+        displayName: Upload coverage artifact
+        condition: always()
+
+  - job: component_test
+    displayName: Component test
+    dependsOn: build
+    pool:
+      name: Default
+    steps:
+      - task: UseDotNet@2
+        displayName: Setup .NET
+        inputs:
+          version: $(dotnetVersion)
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        inputs:
+          key: 'nuget | "$(Agent.OS)" | **/*.csproj, **/global.json'
+          restoreKeys: |
+            nuget | "$(Agent.OS)"
+          path: $(NUGET_PACKAGES)
+
+      - script: dotnet restore
+        displayName: Restore dependencies
+
+      - script: dotnet build --configuration Release --no-restore
+        displayName: Build
+
+      - script: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Components]" --coverage-output-format cobertura --ignore-exit-code 8
+        displayName: Run Blazor component tests with coverage
+
+      - task: CopyFiles@2
+        displayName: Stage TRX files
+        condition: always()
+        inputs:
+          sourceFolder: $(System.DefaultWorkingDirectory)/TestResults
+          contents: '**/*.trx'
+          targetFolder: $(Build.ArtifactStagingDirectory)/trx-component
+
+      - publish: $(Build.ArtifactStagingDirectory)/trx-component
+        artifact: trx-component
+        displayName: Upload TRX artifact
+        condition: always()
+
+      - task: CopyFiles@2
+        displayName: Stage coverage files
+        condition: always()
+        inputs:
+          sourceFolder: $(System.DefaultWorkingDirectory)/TestResults
+          contents: '**/*.cobertura.xml'
+          targetFolder: $(Build.ArtifactStagingDirectory)/coverage-component
+
+      - publish: $(Build.ArtifactStagingDirectory)/coverage-component
+        artifact: coverage-component
+        displayName: Upload coverage artifact
+        condition: always()
+
+  - job: integration_test
+    displayName: Integration Test
+    dependsOn: build
+    pool:
+      name: Default
+    steps:
+      - task: UseDotNet@2
+        displayName: Setup .NET
+        inputs:
+          version: $(dotnetVersion)
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        inputs:
+          key: 'nuget | "$(Agent.OS)" | **/*.csproj, **/global.json'
+          restoreKeys: |
+            nuget | "$(Agent.OS)"
+          path: $(NUGET_PACKAGES)
+
+      - script: dotnet restore
+        displayName: Restore dependencies
+
+      - script: dotnet build --configuration Release --no-restore
+        displayName: Build
+
+      - script: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Integration]" --coverage-output-format cobertura --ignore-exit-code 8
+        displayName: Run integration tests with coverage
+
+      - task: CopyFiles@2
+        displayName: Stage TRX files
+        condition: always()
+        inputs:
+          sourceFolder: $(System.DefaultWorkingDirectory)/TestResults
+          contents: '**/*.trx'
+          targetFolder: $(Build.ArtifactStagingDirectory)/trx-integration
+
+      - publish: $(Build.ArtifactStagingDirectory)/trx-integration
+        artifact: trx-integration
+        displayName: Upload TRX artifact
+        condition: always()
+
+      - task: CopyFiles@2
+        displayName: Stage coverage files
+        condition: always()
+        inputs:
+          sourceFolder: $(System.DefaultWorkingDirectory)/TestResults
+          contents: '**/*.cobertura.xml'
+          targetFolder: $(Build.ArtifactStagingDirectory)/coverage-integration
+
+      - publish: $(Build.ArtifactStagingDirectory)/coverage-integration
+        artifact: coverage-integration
+        displayName: Upload coverage artifact
+        condition: always()
+
+  - job: aspire_test
+    displayName: Aspire Test
+    dependsOn: build
+    pool:
+      name: Default
+    steps:
+      - task: UseDotNet@2
+        displayName: Setup .NET
+        inputs:
+          version: $(dotnetVersion)
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        inputs:
+          key: 'nuget | "$(Agent.OS)" | **/*.csproj, **/global.json'
+          restoreKeys: |
+            nuget | "$(Agent.OS)"
+          path: $(NUGET_PACKAGES)
+
+      - script: dotnet restore
+        displayName: Restore dependencies
+
+      - script: dotnet build --configuration Release --no-restore
+        displayName: Build
+
       - script: |
           mkdir -p "$HOME/.aspnet/https"
           dotnet dev-certs https -ep "$HOME/.aspnet/https/devcert.crt" --format PEM --no-password
@@ -48,78 +234,86 @@ jobs:
           sudo update-ca-certificates
         displayName: Trust ASP.NET Core dev certificate
 
-      - script: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=UnitTest]" --coverage-output-format cobertura --ignore-exit-code 8
-        displayName: Run unit tests with coverage
-        continueOnError: true
-
-      - script: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Components]" --coverage-output-format cobertura --ignore-exit-code 8
-        displayName: Run Blazor component tests with coverage
-        continueOnError: true
-
-      - script: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=Integration]" --coverage-output-format cobertura --ignore-exit-code 8
-        displayName: Run integration tests with coverage
-        continueOnError: true
-
       - script: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx --treenode-filter "/*/*/*/*[Category=AppHost]" --coverage-output-format cobertura --ignore-exit-code 8
         displayName: Run Aspire tests with coverage
-        continueOnError: true
         env:
           ASPIRE_ALLOW_UNSECURED_TRANSPORT: 'true'
 
       - task: CopyFiles@2
         displayName: Stage TRX files
-        condition: succeededOrFailed()
+        condition: always()
         inputs:
           sourceFolder: $(System.DefaultWorkingDirectory)/TestResults
           contents: '**/*.trx'
-          targetFolder: $(Build.ArtifactStagingDirectory)/trx
+          targetFolder: $(Build.ArtifactStagingDirectory)/trx-aspire
 
-      - publish: $(Build.ArtifactStagingDirectory)/trx
-        artifact: trx
+      - publish: $(Build.ArtifactStagingDirectory)/trx-aspire
+        artifact: trx-aspire
         displayName: Upload TRX artifact
-        condition: succeededOrFailed()
+        condition: always()
 
       - task: CopyFiles@2
         displayName: Stage coverage files
-        condition: succeededOrFailed()
+        condition: always()
         inputs:
           sourceFolder: $(System.DefaultWorkingDirectory)/TestResults
           contents: '**/*.cobertura.xml'
-          targetFolder: $(Build.ArtifactStagingDirectory)/coverage
+          targetFolder: $(Build.ArtifactStagingDirectory)/coverage-aspire
 
-      - publish: $(Build.ArtifactStagingDirectory)/coverage
-        artifact: coverage
+      - publish: $(Build.ArtifactStagingDirectory)/coverage-aspire
+        artifact: coverage-aspire
         displayName: Upload coverage artifact
-        condition: succeededOrFailed()
+        condition: always()
+
+  - job: report
+    displayName: Report
+    dependsOn:
+      - test
+      - component_test
+      - integration_test
+      - aspire_test
+    condition: succeeded()
+    pool:
+      name: Default
+    steps:
+      - checkout: none
+
+      - task: DownloadPipelineArtifact@2
+        displayName: Download TRX artifacts
+        inputs:
+          patterns: 'trx-*/**'
+          path: $(Pipeline.Workspace)/artifacts
+
+      - task: DownloadPipelineArtifact@2
+        displayName: Download coverage artifacts
+        inputs:
+          patterns: 'coverage-*/**'
+          path: $(Pipeline.Workspace)/artifacts
 
       - task: reportgenerator@5
         displayName: Generate combined coverage report
-        condition: succeededOrFailed()
         inputs:
-          reports: $(System.DefaultWorkingDirectory)/TestResults/**/*.cobertura.xml
-          targetdir: $(Build.ArtifactStagingDirectory)/CoverageReport
+          reports: $(Pipeline.Workspace)/artifacts/coverage-*/**/*.cobertura.xml
+          targetdir: $(Pipeline.Workspace)/CoverageReport
           reporttypes: HtmlInline_AzurePipelines;Cobertura
           title: TUnit.Sample
 
       - task: PublishCodeCoverageResults@2
         displayName: Publish merged coverage
-        condition: succeededOrFailed()
         inputs:
-          summaryFileLocation: $(Build.ArtifactStagingDirectory)/CoverageReport/Cobertura.xml
+          summaryFileLocation: $(Pipeline.Workspace)/CoverageReport/Cobertura.xml
           pathToSources: $(Build.SourcesDirectory)
 
       - task: PublishTestResults@2
         displayName: Publish merged test results
-        condition: succeededOrFailed()
+        condition: always()
         inputs:
           testResultsFormat: VSTest
-          testResultsFiles: '**/*.trx'
-          searchFolder: $(System.DefaultWorkingDirectory)/TestResults
+          testResultsFiles: 'trx-*/**/*.trx'
+          searchFolder: $(Pipeline.Workspace)/artifacts
           mergeTestResults: true
           testRunTitle: All tests
-          failTaskOnFailedTests: true
 
-      - publish: $(Build.ArtifactStagingDirectory)/CoverageReport
+      - publish: $(Pipeline.Workspace)/CoverageReport
         artifact: coverage-report
         displayName: Upload combined coverage report
-        condition: succeededOrFailed()
